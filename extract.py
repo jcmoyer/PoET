@@ -39,7 +39,10 @@ def run(args):
     print(args.filename + ' does not exist')
     return
 
+  print('Reading the archive directory structure.')
+  print('Please be patient as this may a few minutes.')
+
   with ggpk.File(args.filename) as archive:
     extract_recurse(archive, args.directory, '', archive.root())
 
-  print('Done.')
+  print('Done!')
