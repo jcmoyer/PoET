@@ -21,12 +21,6 @@ def add_parsers(parent):
   extract_parser.add_argument('directory')
   extract_parser.set_defaults(func=run)
 
-def print_recurse(depth, item):
-  print(' ' * 2 * depth + item.name)
-  if hasattr(item, 'children'):
-    for child in item.children:
-      print_recurse(depth + 1, child)
-
 def extract_recurse(arch, dest, path, item):
   destname = os.path.join(dest, path, item.name)
   if isinstance(item, ggpk.DirectoryEntry):
