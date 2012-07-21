@@ -44,7 +44,10 @@ class File:
     return DirectoryInfo(self.header.rootoffs, 0)
 
 class FileHeader:
-  # Version 32 | Identifier 'GGPK' | Unknown 32 | Root offset 64 | Unknown 64
+  """
+  Contains information regarding a GGPK archive file.
+  """
+  # Version U32 | Identifier 'GGPK' | Unknown U32 | Root offset U64 | Unknown U64
   __struct = struct.Struct('<I4sIQQ')
 
   def __init__(self, version, identifier, rootoffs):
@@ -128,11 +131,17 @@ def read_entry(fd):
     return None
 
 class DirectoryEntry:
+  """
+  Represents a virtual directory in a GGPK archive file.
+  """
   def __init__(self, name, children):
     self.name     = name
     self.children = children
 
 class FileEntry:
+  """
+  Represents a virtual file entry in a GGPK archive file.
+  """
   def __init__(self, name, where):
     """
     Creates a FileEntry given a name and pointer to the actual file data.
