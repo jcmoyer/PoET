@@ -69,6 +69,33 @@ class DirectoryInfo:
   def __repr__(self):
     return '0x{0:016x}'.format(self.offs)
 
+class DirectoryEntry:
+  """
+  Represents a virtual directory in a GGPK archive file.
+  """
+  def __init__(self, name, children):
+    self.name     = name
+    self.children = children
+
+class FileEntry:
+  """
+  Represents a virtual file entry in a GGPK archive file.
+  """
+  def __init__(self, name, where):
+    """
+    Creates a FileEntry given a name and pointer to the actual file data.
+
+    where must be a 2-tuple containing (offset, size).
+    """
+    self.name  = name
+    self.where = where
+
+  def extract(self, arch, filename):
+    arch.fd.seek(self.where[0])
+    with open(filename, 'wb+') as f:
+      data = arch.fd.read(self.where[1])
+      f.write(data)
+
 def decode_str(s):
   return s.decode('utf16')
 
@@ -126,31 +153,4 @@ def read_entry(fd):
     return read_file(fd, curoffs + nextoffs)
   elif ent_type == 'FREE':
     return None
-
-class DirectoryEntry:
-  """
-  Represents a virtual directory in a GGPK archive file.
-  """
-  def __init__(self, name, children):
-    self.name     = name
-    self.children = children
-
-class FileEntry:
-  """
-  Represents a virtual file entry in a GGPK archive file.
-  """
-  def __init__(self, name, where):
-    """
-    Creates a FileEntry given a name and pointer to the actual file data.
-
-    where must be a 2-tuple containing (offset, size).
-    """
-    self.name  = name
-    self.where = where
-
-  def extract(self, arch, filename):
-    arch.fd.seek(self.where[0])
-    with open(filename, 'wb+') as f:
-      data = arch.fd.read(self.where[1])
-      f.write(data)
 
