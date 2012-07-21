@@ -58,17 +58,6 @@ class FileHeader:
     version, identifier, _, rootoffs, _ = FileHeader.__struct.unpack_from(buf)
     return FileHeader(version, identifier, rootoffs)
 
-class DirectoryInfo:
-  """
-  Tells where a directory can be found in a GGPK file.
-  """
-  def __init__(self, offs, nextoffs):
-    self.offs     = offs
-    self.nextoffs = nextoffs
-
-  def __repr__(self):
-    return '0x{0:016x}'.format(self.offs)
-
 class DirectoryEntry:
   """
   Represents a virtual directory in a GGPK archive file.
