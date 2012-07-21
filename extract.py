@@ -16,9 +16,9 @@ import os
 import ggpk
 
 def add_parsers(parent):
-  extract_parser = parent.add_parser('extract', help='Extracts a ggpk file')
-  extract_parser.add_argument('filename')
-  extract_parser.add_argument('directory')
+  extract_parser = parent.add_parser('extract', help='Extracts a .ggpk file')
+  extract_parser.add_argument('filename', help='Path to .ggpk file')
+  extract_parser.add_argument('directory', help='Directory to extract files to')
   extract_parser.set_defaults(func=run)
 
 def extract_recurse(arch, dest, path, item):
