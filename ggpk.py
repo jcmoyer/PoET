@@ -40,6 +40,10 @@ class File:
   def root(self):
     return self.__root_dir
 
+  def extract(self, file):
+    self.fd.seek(file.where[0])
+    return self.fd.read(file.where[1])
+
 class FileHeader:
   """
   Contains information regarding a GGPK archive file.
@@ -78,12 +82,6 @@ class FileEntry:
     """
     self.name  = name
     self.where = where
-
-  def extract(self, arch, filename):
-    arch.fd.seek(self.where[0])
-    with open(filename, 'wb+') as f:
-      data = arch.fd.read(self.where[1])
-      f.write(data)
 
 def decode_str(s):
   return s.decode('utf16')

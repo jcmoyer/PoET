@@ -30,7 +30,9 @@ def extract_recurse(arch, dest, path, item):
     for child in item.children:
       extract_recurse(arch, dest, os.path.join(path, item.name), child)
   elif isinstance(item, ggpk.FileEntry):
-    item.extract(arch, destname)
+    with open(destname, 'wb+') as f:
+      data = arch.extract(item)
+      f.write(data)
 
 def run(args):
   if not os.path.exists(args.filename):
