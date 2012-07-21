@@ -40,9 +40,6 @@ class File:
   def root(self):
     return self.__root_dir
 
-  def resolve(self, path):
-    return DirectoryInfo(self.header.rootoffs, 0)
-
 class FileHeader:
   """
   Contains information regarding a GGPK archive file.
