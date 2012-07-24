@@ -14,10 +14,12 @@
 
 import argparse
 import extract
+import diff
 
 parser = argparse.ArgumentParser(description='Path of Exile Tool')
 subparsers = parser.add_subparsers()
 extract.add_parsers(subparsers)
+diff.add_parsers(subparsers)
 
 def main():
   args = parser.parse_args()
