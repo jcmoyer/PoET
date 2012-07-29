@@ -25,6 +25,11 @@ def add_parsers(parent):
                                   'changed between two extraction versions'))
   diff_parser.add_argument('dir1', help='First (old) extraction directory')
   diff_parser.add_argument('dir2', help='Second (new) extraction directory')
+  diff_parser.add_argument('-bs',
+                           help=('Size of buffer to use when comparing files '
+                                 '(default 16383)'),
+                           type=int, dest='buffersize', default=0x3FFF,
+                           metavar='size')
   diff_parser.set_defaults(func=run)
 
 def tree(directory, child_base=True):
@@ -71,15 +76,19 @@ def compare(f1, f2, bufsize=0x3FFF):
         break
   return Same
 
-def diff(d1, d2):
+def diff(d1, d2, bufsize=0x3FFF):
   """
   Recursively compares the files contained in two directories and prints
   information about what changed.
+
+  Keyword arguments:
+    bufsize -- size of buffer to use when comparing files. Defaults to 0x3FFF,
+    which is 16K.
   """
   t1 = tree(d1)
   t2 = tree(d2)
   for f in t2:
-    result = compare(os.path.join(d1, f), os.path.join(d2, f))
+    result = compare(os.path.join(d1, f), os.path.join(d2, f), bufsize)
     if result == New:
       print("NEW      {0}".format(f))
     elif result == Modified:
@@ -98,4 +107,4 @@ def run(args):
   print('Comparing {0} to {1}...this will take some time.'.format(args.dir1,
                                                                   args.dir2))
 
-  diff(args.dir1, args.dir2)
+  diff(args.dir1, args.dir2, args.buffersize)
