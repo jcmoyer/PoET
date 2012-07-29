@@ -13,6 +13,7 @@
 #   limitations under the License.
 
 import os
+import sys
 
 # File comparison constants
 Same     = 0
@@ -95,23 +96,16 @@ def diff(d1, d2, bufsize=0x3FFF, fd=None):
   for f in t2:
     result = compare(os.path.join(d1, f), os.path.join(d2, f), bufsize)
     if result == New:
-      out = "NEW      {0}".format(f)
-      print(out)
-      if fd:
-        fd.write(out)
-        fd.write(os.linesep)
+      write_summary_item('NEW', f, sys.stdout, fd)
     elif result == Modified:
-      out = "MODIFIED {0}".format(f)
-      print(out)
-      if fd:
-        fd.write(out)
-        fd.write(os.linesep)
+      write_summary_item('MODIFIED', f, sys.stdout, fd)
     elif result == Deleted:
-      out = "DELETED  {0}".format(f)
-      print(out)
-      if fd:
-        fd.write(out)
-        fd.write(os.linesep)
+      write_summary_item('DELETED', f, sys.stdout, fd)
+
+def write_summary_item(kind, item, *files):
+  for f in files:
+    if f:
+      f.write("{0:10}{1}{2}".format(kind, item, os.linesep))
 
 def run(args):
   if not os.path.exists(args.dir1):
