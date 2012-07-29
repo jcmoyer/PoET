@@ -16,7 +16,7 @@ import filecmp
 import os
 
 def add_parsers(parent):
-  diff_parser = parent.add_parser('diff', help=('Provides a summary of what'
+  diff_parser = parent.add_parser('diff', help=('Provides a summary of what '
                                   'changed between two extraction versions'))
   diff_parser.add_argument('dir1', help='First (old) extraction directory')
   diff_parser.add_argument('dir2', help='Second (new) extraction directory')
