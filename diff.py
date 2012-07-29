@@ -43,6 +43,10 @@ def compare(f1, f2, bufsize=0x3FFF):
   Given two filenames, compares the files and returns a value representing the
   difference.
 
+  Keyword arguments:
+    bufsize -- size of buffer to use when comparing files. Defaults to 0x3FFF,
+    which is 16K.
+
   Returns one of the constants:
     * Same
     * Modified
