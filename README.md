@@ -17,7 +17,7 @@ You may pass -h to the script to receive more detailed help:
     positional arguments:
       {extract,diff}
         extract       Extracts a .ggpk file
-        diff          Provides a summary of whatchanged between two extraction
+        diff          Provides a summary of what changed between two extraction
                       versions
     
     optional arguments:
