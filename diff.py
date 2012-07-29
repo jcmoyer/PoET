@@ -30,6 +30,10 @@ def add_parsers(parent):
                                  '(default 16383)'),
                            type=int, dest='buffersize', default=0x3FFF,
                            metavar='size')
+  diff_parser.add_argument('-f',
+                           help='Filename to optionally write results to',
+                           type=str, dest='filename', default=None,
+                           metavar='filename')
   diff_parser.set_defaults(func=run)
 
 def tree(directory, child_base=True):
@@ -76,7 +80,7 @@ def compare(f1, f2, bufsize=0x3FFF):
         break
   return Same
 
-def diff(d1, d2, bufsize=0x3FFF):
+def diff(d1, d2, bufsize=0x3FFF, fd=None):
   """
   Recursively compares the files contained in two directories and prints
   information about what changed.
@@ -84,17 +88,30 @@ def diff(d1, d2, bufsize=0x3FFF):
   Keyword arguments:
     bufsize -- size of buffer to use when comparing files. Defaults to 0x3FFF,
     which is 16K.
+    fd -- file descriptor to write summaries to in addition to stdout.
   """
   t1 = tree(d1)
   t2 = tree(d2)
   for f in t2:
     result = compare(os.path.join(d1, f), os.path.join(d2, f), bufsize)
     if result == New:
-      print("NEW      {0}".format(f))
+      out = "NEW      {0}".format(f)
+      print(out)
+      if fd:
+        fd.write(out)
+        fd.write(os.linesep)
     elif result == Modified:
-      print("MODIFIED {0}".format(f))
+      out = "MODIFIED {0}".format(f)
+      print(out)
+      if fd:
+        fd.write(out)
+        fd.write(os.linesep)
     elif result == Deleted:
-      print("DELETED  {0}".format(f))
+      out = "DELETED  {0}".format(f)
+      print(out)
+      if fd:
+        fd.write(out)
+        fd.write(os.linesep)
 
 def run(args):
   if not os.path.exists(args.dir1):
@@ -107,4 +124,8 @@ def run(args):
   print('Comparing {0} to {1}...this will take some time.'.format(args.dir1,
                                                                   args.dir2))
 
-  diff(args.dir1, args.dir2, args.buffersize)
+  if args.filename is not None:
+    with open(args.filename, 'w+') as f:
+      diff(args.dir1, args.dir2, args.buffersize, f)
+  else:
+    diff(args.dir1, args.dir2, args.buffersize)
