@@ -40,7 +40,7 @@ def run(args):
     return
 
   print('Reading the archive directory structure.')
-  print('Please be patient as this may a few minutes.')
+  print('Please be patient as this may take a few minutes.')
 
   with ggpk.File(args.filename) as archive:
     extract_recurse(archive, args.directory, '', archive.root())
