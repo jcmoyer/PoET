@@ -12,8 +12,13 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import filecmp
 import os
+
+# File comparison constants
+Same     = 0
+Modified = 1
+New      = 2
+Deleted  = 3
 
 def add_parsers(parent):
   diff_parser = parent.add_parser('diff', help=('Provides a summary of what '
@@ -22,12 +27,61 @@ def add_parsers(parent):
   diff_parser.add_argument('dir2', help='Second (new) extraction directory')
   diff_parser.set_defaults(func=run)
 
-def files_in(directory):
-  base = None
+def tree(directory, child_base=True):
+  """
+  Given a directory, returns each file in the directory and its subdirectories
+  recursively.
+  """
+  base = 0
   for (root, dirs, files) in os.walk(directory):
-    if base is None: base = len(root) + 1
+    if child_base and base is 0: base = len(root) + 1
     for f in files:
       yield os.path.join(root, f)[base:]
+
+def compare(f1, f2, bufsize=0x3FFF):
+  """
+  Given two filenames, compares the files and returns a value representing the
+  difference.
+
+  Returns one of the constants:
+    * Same
+    * Modified
+    * New
+    * Deleted
+  """
+  f1_exists = os.path.exists(f1)
+  f2_exists = os.path.exists(f2)
+  if not f1_exists and f2_exists:
+    return New
+  if f1_exists and not f2_exists:
+    return Deleted
+  if os.path.getsize(f1) != os.path.getsize(f2):
+    return Modified
+  with open(f1, 'rb') as fd1, open(f2, 'rb') as fd2:
+    while True:
+      chunk1 = fd1.read(bufsize)
+      chunk2 = fd2.read(bufsize)
+      if chunk1 != chunk2: return Modified
+      # If the files both end at the same place then break.
+      if not chunk1 and not chunk2:
+        break
+  return Same
+
+def diff(d1, d2):
+  """
+  Recursively compares the files contained in two directories and prints
+  information about what changed.
+  """
+  t1 = tree(d1)
+  t2 = tree(d2)
+  for f in t2:
+    result = compare(os.path.join(d1, f), os.path.join(d2, f))
+    if result == New:
+      print("NEW      {0}".format(f))
+    elif result == Modified:
+      print("MODIFIED {0}".format(f))
+    elif result == Deleted:
+      print("DELETED  {0}".format(f))
 
 def run(args):
   if not os.path.exists(args.dir1):
@@ -40,15 +94,4 @@ def run(args):
   print('Comparing {0} to {1}...this will take some time.'.format(args.dir1,
                                                                   args.dir2))
 
-  os.walk(args.dir1)
-  (match, mismatch, errors) = filecmp.cmpfiles(args.dir1, args.dir2,
-                                               files_in(args.dir2))
-
-  for m in mismatch:
-    print('MODIFIED {0}'.format(m))
-  for e in errors:
-    if not os.path.exists(os.path.join(args.dir1, e)):
-      print('ADDED {0}'.format(e))
-    elif not os.path.exists(os.path.join(args.dir2, e)):
-      print('REMOVED {0}'.format(e))
-
+  diff(args.dir1, args.dir2)
