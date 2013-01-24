@@ -134,10 +134,10 @@ _entry_struct = struct.Struct('<I4s')
 def _read_entry(fd):
   curoffs = fd.tell()
   nextoffs, ent_type = _read_struct(fd, _entry_struct)
-  if ent_type == 'PDIR':
+  if ent_type == b'PDIR':
     return _read_pdir(fd)
-  elif ent_type == 'FILE':
+  elif ent_type == b'FILE':
     return _read_file(fd, curoffs + nextoffs)
-  elif ent_type == 'FREE':
+  elif ent_type == b'FREE':
     return None
 

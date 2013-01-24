@@ -3,7 +3,7 @@
 PoET is a command line tool for extracting data from the Path of Exile content package.
 
 ## Installation
-PoET was developed against [Python 3.2.3](http://www.python.org/download/). As such, you require a Python 3.x interpreter to use it. PoET is simple to use. Here is an example:
+PoET was developed against [Python 3.3.0](http://www.python.org/download/). As such, you will need a Python 3.3.0 interpreter to use it. PoET is simple to use. Here is an example:
 
     $ poet.py extract "path/to/Content.ggpk" "directory/to/extract/to"
 
