@@ -105,7 +105,10 @@ def diff(d1, d2, bufsize=0x3FFF, fd=None):
 def write_summary_item(kind, item, *files):
   for f in files:
     if f:
-      f.write("{0:10}{1}{2}".format(kind, item, os.linesep))
+      # Previously this manually wrote os.linesep, but it turns out that \n is
+      # automatically replaced with the correct line ending.
+      # See: http://docs.python.org/release/3.3.0/library/os.html#os.linesep
+      f.write("{0:10}{1}\n".format(kind, item))
 
 def run(args):
   if not os.path.exists(args.dir1):
