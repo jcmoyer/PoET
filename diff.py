@@ -21,6 +21,20 @@ Modified = 1
 New      = 2
 Deleted  = 3
 
+DefaultText = {
+  Same     : 'SAME',
+  Modified : 'MODIFIED',
+  New      : 'ADDED',
+  Deleted  : 'DELETED'
+}
+
+ShorthandText = {
+  Same     : '[=]',
+  Modified : '[*]',
+  New      : '[+]',
+  Deleted  : '[-]'
+}
+
 def add_parsers(parent):
   diff_parser = parent.add_parser('diff', help=('Provides a summary of what '
                                   'changed between two extraction versions'))
@@ -35,6 +49,10 @@ def add_parsers(parent):
                            help='Filename to optionally write results to',
                            type=str, dest='filename', default=None,
                            metavar='filename')
+  diff_parser.add_argument('-s', '--shorthand-description',
+                           help=('Displays +, -, or * instead of ADDED, '
+                                 'DELETED, or MODIFIED'),
+                           dest='shorthand', action='store_true')
   diff_parser.set_defaults(func=run)
 
 def tree(directory, child_base=True):
@@ -81,7 +99,7 @@ def compare(f1, f2, bufsize=0x3FFF):
         break
   return Same
 
-def diff(d1, d2, bufsize=0x3FFF, fd=None):
+def diff(d1, d2, bufsize=0x3FFF, fd=None, kind_text=DefaultText):
   """
   Recursively compares the files contained in two directories and prints
   information about what changed.
@@ -90,25 +108,31 @@ def diff(d1, d2, bufsize=0x3FFF, fd=None):
     bufsize -- size of buffer to use when comparing files. Defaults to 0x3FFF,
     which is 16K.
     fd -- file descriptor to write summaries to in addition to stdout.
+    kind_text -- dict that maps comparison results to text values. Defaults to
+    DefaultText.
   """
   t1 = tree(d1)
   t2 = tree(d2)
   for f in t2:
     result = compare(os.path.join(d1, f), os.path.join(d2, f), bufsize)
-    if result == New:
-      write_summary_item('NEW', f, sys.stdout, fd)
-    elif result == Modified:
-      write_summary_item('MODIFIED', f, sys.stdout, fd)
-    elif result == Deleted:
-      write_summary_item('DELETED', f, sys.stdout, fd)
+    if result is not Same:
+      write_summary_item(kind_text, result, f, sys.stdout, fd)
 
-def write_summary_item(kind, item, *files):
+def write_summary_item(kind_text, kind, item, *files):
+  # Calculates the amount of padding necessary for a given kind_text. This is
+  # equal to the largest value in the dict plus one character to account for
+  # a trailing space.
+  def calculate_kind_width():
+    l = max(kind_text.values(), key=len)
+    return len(l) + 1
+  # Previously this manually wrote os.linesep, but it turns out that \n is
+  # automatically replaced with the correct line ending.
+  # See: http://docs.python.org/release/3.3.0/library/os.html#os.linesep
+  fmt_string = "{{0:{0}}}{{1}}\n".format(calculate_kind_width())
+  text       = fmt_string.format(kind_text[kind], item)
   for f in files:
     if f:
-      # Previously this manually wrote os.linesep, but it turns out that \n is
-      # automatically replaced with the correct line ending.
-      # See: http://docs.python.org/release/3.3.0/library/os.html#os.linesep
-      f.write("{0:10}{1}\n".format(kind, item))
+      f.write(text)
 
 def run(args):
   if not os.path.exists(args.dir1):
@@ -121,8 +145,9 @@ def run(args):
   print('Comparing {0} to {1}...this will take some time.'.format(args.dir1,
                                                                   args.dir2))
 
+  text_source = ShorthandText if args.shorthand else DefaultText
   if args.filename is not None:
     with open(args.filename, 'w+') as f:
-      diff(args.dir1, args.dir2, args.buffersize, f)
+      diff(args.dir1, args.dir2, args.buffersize, f, text_source)
   else:
-    diff(args.dir1, args.dir2, args.buffersize)
+    diff(args.dir1, args.dir2, args.buffersize, kind_text=text_source)
