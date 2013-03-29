@@ -62,6 +62,15 @@ class FileHeader:
     version, identifier, _, rootoffs, _ = FileHeader.__struct.unpack_from(buf)
     return FileHeader(version, identifier, rootoffs)
 
+class ChildPointer:
+  def __init__(self, fd, where):
+    self.fd    = fd
+    self.where = where
+
+  def read(self):
+    self.fd.seek(self.where)
+    return _read_entry(self.fd)
+
 class DirectoryEntry:
   """
   Represents a virtual directory in a GGPK archive file.
@@ -69,6 +78,10 @@ class DirectoryEntry:
   def __init__(self, name, children):
     self.name     = name
     self.children = children
+
+  def __iter__(self):
+    for child in self.children:
+      yield child.read()
 
 class FileEntry:
   """
@@ -110,7 +123,8 @@ def _read_pdir(fd):
     nextpos = fd.tell()
     # Read the child right now
     fd.seek(childoffs)
-    children.append(_read_entry(fd))
+    # Layer of indirection to implement laziness
+    children.append(ChildPointer(fd, childoffs))
     fd.seek(nextpos)
   return DirectoryEntry(name, children)
 
