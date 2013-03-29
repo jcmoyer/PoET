@@ -23,7 +23,14 @@ diff.add_parsers(subparsers)
 
 def main():
   args = parser.parse_args()
-  args.func(args)
+  # Ugly hack for Python 3.3.0. Previously this was all done automatically.
+  # See: http://bugs.python.org/issue16308
+  try:
+    func = args.func
+  except AttributeError:
+    parser.print_help()
+    return
+  func(args)
 
 if __name__ == '__main__':
   main()
