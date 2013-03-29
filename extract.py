@@ -27,7 +27,7 @@ def extract_recurse(arch, dest, path, item):
     print('Extracting directory ' + destname)
     if not os.path.exists(destname):
       os.mkdir(destname)
-    for child in item.children:
+    for child in item:
       extract_recurse(arch, dest, os.path.join(path, item.name), child)
   elif isinstance(item, ggpk.FileEntry):
     with open(destname, 'wb+') as f:
@@ -38,9 +38,6 @@ def run(args):
   if not os.path.exists(args.filename):
     print(args.filename + ' does not exist')
     return
-
-  print('Reading the archive directory structure.')
-  print('Please be patient as this may take a few minutes.')
 
   with ggpk.File(args.filename) as archive:
     extract_recurse(archive, args.directory, '', archive.root())
